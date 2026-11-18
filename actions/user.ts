@@ -13,9 +13,6 @@ export const updateUser = async (values: Partial<User>) => {
     bio: values.bio,
   };
 
-  console.log("HELLOLLLLLLLLLLLLLLLLL")
-  console.log("self", self);
-
   const user = await db.user.update({
     where: { id: self.id },
     data: { ...validData }

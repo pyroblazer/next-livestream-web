@@ -17,10 +17,15 @@ export async function POST(req: Request) {
     return new Response("No authorization header", { status: 400 });
   }
 
-  const event = receiver.receive(body, authorization);
+  let event;
+  try {
+    event = receiver.receive(body, authorization);
+  } catch {
+    return new Response("Invalid signature", { status: 401 });
+  }
 
   if (event.event === "ingress_started") {
-    await db.stream.update({
+    await db.stream.updateMany({
       where: {
         ingressId: event.ingressInfo?.ingressId,
       },
@@ -31,7 +36,7 @@ export async function POST(req: Request) {
   }
 
   if (event.event === "ingress_ended") {
-    await db.stream.update({
+    await db.stream.updateMany({
       where: {
         ingressId: event.ingressInfo?.ingressId,
       },
@@ -40,4 +45,6 @@ export async function POST(req: Request) {
       },
     });
   }
+
+  return new Response("ok", { status: 200 });
 }

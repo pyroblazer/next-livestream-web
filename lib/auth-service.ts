@@ -1,8 +1,9 @@
+import { cache } from "react";
 import { currentUser } from "@clerk/nextjs";
 
 import { db } from "@/lib/db";
 
-export const getSelf = async () => {
+export const getSelf = cache(async () => {
   const self = await currentUser();
 
   if (!self || !self.username) {
@@ -14,8 +15,11 @@ export const getSelf = async () => {
   });
 
   if (!user) {
-    return await db.user.create({
-      data: {
+    // upsert: the Clerk webhook and parallel server renders can race to create the same user
+    return await db.user.upsert({
+      where: { externalUserId: self.id },
+      update: {},
+      create: {
         externalUserId: self.id,
         username: self.username,
         imageUrl: self.imageUrl,
@@ -29,7 +33,7 @@ export const getSelf = async () => {
   }
 
   return user;
-};
+});
 
 export const getSelfByUsername = async (username: string) => {
   const self = await getSelf();

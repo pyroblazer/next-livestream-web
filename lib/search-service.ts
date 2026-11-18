@@ -48,6 +48,7 @@ export const getSearch = async (term?: string) => {
         thumbnailUrl: true,
         updatedAt: true,
       },
+      take: 100,
       orderBy: [
         {
           isLive: "desc",
@@ -83,6 +84,7 @@ export const getSearch = async (term?: string) => {
         thumbnailUrl: true,
         updatedAt: true,
       },
+      take: 100,
       orderBy: [
         {
           isLive: "desc",

@@ -49,6 +49,7 @@ export const getRecommended = async () => {
           },
         },
       },
+      take: 100,
       orderBy: [
         {
           stream: {
@@ -69,6 +70,7 @@ export const getRecommended = async () => {
           },
         },
       },
+      take: 100,
       orderBy: [
         {
           stream: {

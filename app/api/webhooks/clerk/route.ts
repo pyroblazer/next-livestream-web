@@ -52,10 +52,13 @@ export async function POST(req: Request) {
   const eventType = evt.type;
 
   if (eventType === "user.created") {
-    console.log("User", payload.data)
-
-    await db.user.create({
-      data: {
+    await db.user.upsert({
+      where: { externalUserId: payload.data.id },
+      update: {
+        username: payload.data.username,
+        imageUrl: payload.data.image_url,
+      },
+      create: {
         externalUserId: payload.data.id,
         username: payload.data.username,
         imageUrl: payload.data.image_url,
@@ -81,13 +84,16 @@ export async function POST(req: Request) {
   }
  
   if (eventType === "user.deleted") {
-    await resetIngresses(payload.data.id);
-
-    await db.user.delete({
-      where: {
-        externalUserId: payload.data.id,
-      },
+    // LiveKit rooms/ingresses are keyed by our internal user id, not the Clerk id
+    const existing = await db.user.findUnique({
+      where: { externalUserId: payload.data.id },
+      select: { id: true },
     });
+
+    if (existing) {
+      await resetIngresses(existing.id);
+      await db.user.delete({ where: { id: existing.id } });
+    }
   }
  
   return new Response('', { status: 200 })
