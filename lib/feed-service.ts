@@ -1,7 +1,8 @@
 import { db } from "@/lib/db"
 import { getSelf } from "@/lib/auth-service"
 
-export const getStreams = async () => {
+export const getStreams = async (category?: string) => {
+  const categoryFilter = category ? { category } : {};
   let userId;
 
   try {
@@ -16,6 +17,7 @@ export const getStreams = async () => {
   if (userId) {
     streams = await db.stream.findMany({
       where: {
+        ...categoryFilter,
         user: {
           NOT: {
             blocking: {
@@ -45,6 +47,7 @@ export const getStreams = async () => {
     });
   } else {
     streams = await db.stream.findMany({
+      where: categoryFilter,
       select: {
         id: true,
         user: true,

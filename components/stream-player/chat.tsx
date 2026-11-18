@@ -24,6 +24,8 @@ interface ChatProps {
   isChatEnabled: boolean;
   isChatDelayed: boolean;
   isChatFollowersOnly: boolean;
+  slowModeSeconds?: number;
+  bannedWords?: string | null;
 };
 
 export const Chat = ({
@@ -33,7 +35,9 @@ export const Chat = ({
   isFollowing,
   isChatEnabled,
   isChatDelayed,
-  isChatFollowersOnly
+  isChatFollowersOnly,
+  slowModeSeconds = 0,
+  bannedWords = null,
 }: ChatProps) => {
   const matches = useMediaQuery('(max-width: 1024px)');
   const { variant, onExpand } = useChatSidebar((state) => state);
@@ -85,6 +89,8 @@ export const Chat = ({
             isFollowersOnly={isChatFollowersOnly}
             isDelayed={isChatDelayed}
             isFollowing={isFollowing}
+            slowModeSeconds={slowModeSeconds}
+            bannedWords={bannedWords}
           />
         </>
       )}
@@ -92,6 +98,7 @@ export const Chat = ({
         <ChatCommunity
           viewerName={viewerName}
           hostName={hostName}
+          hostIdentity={hostIdentity}
           isHidden={isHidden}
         />
       )}

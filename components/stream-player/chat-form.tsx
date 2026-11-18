@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+
+import { containsBannedWord, parseBannedWords, slowModeWait } from "@/lib/moderation";
 
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -17,6 +19,8 @@ interface ChatFormProps {
   isFollowersOnly: boolean;
   isFollowing: boolean;
   isDelayed: boolean;
+  slowModeSeconds?: number;
+  bannedWords?: string | null;
 };
 
 export const ChatForm = ({
@@ -27,8 +31,12 @@ export const ChatForm = ({
   isFollowersOnly,
   isFollowing,
   isDelayed,
+  slowModeSeconds = 0,
+  bannedWords = null,
 }: ChatFormProps) => {
   const [isDelayBlocked, setIsDelayBlocked] = useState(false);
+  const [notice, setNotice] = useState("");
+  const lastSent = useRef<number | null>(null);
 
   const isFollowersOnlyAndNotFollowing = isFollowersOnly && !isFollowing;
   const isDisabled = isHidden || isDelayBlocked || isFollowersOnlyAndNotFollowing;
@@ -38,6 +46,20 @@ export const ChatForm = ({
     e.stopPropagation();
 
     if (!value || isDisabled) return;
+
+    // Client-side guards (LiveKit data messages cannot be intercepted server-side).
+    // Hard enforcement for abusers is the timeout, which revokes publish permission.
+    if (containsBannedWord(value, parseBannedWords(bannedWords))) {
+      setNotice("Your message contains a word that is not allowed in this chat.");
+      return;
+    }
+    const wait = slowModeWait(lastSent.current, Date.now(), slowModeSeconds);
+    if (wait > 0) {
+      setNotice(`Slow mode: wait ${wait}s before sending another message.`);
+      return;
+    }
+    setNotice("");
+    lastSent.current = Date.now();
 
     if (isDelayed && !isDelayBlocked) {
       setIsDelayBlocked(true);
@@ -64,6 +86,7 @@ export const ChatForm = ({
           isDelayed={isDelayed}
           isFollowersOnly={isFollowersOnly}
         />
+        {notice && <p role="alert" className="text-xs text-destructive mb-1">{notice}</p>}
         <Input
           onChange={(e) => onChange(e.target.value)}
           value={value}

@@ -3,6 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import { 
+  BarChart3,
   Fullscreen,
   KeyRound,
   MessageSquare,
@@ -32,6 +33,11 @@ export const Navigation = () => {
       icon: MessageSquare,
     },
     {
+      label: "Analytics",
+      href: `/u/${user?.username}/analytics`,
+      icon: BarChart3,
+    },
+    {
       label: "Community",
       href: `/u/${user?.username}/community`,
       icon: Users,
@@ -41,7 +47,7 @@ export const Navigation = () => {
   if (!user?.username) {
     return (
       <ul className="space-y-2">
-        {[...Array(4)].map((_, i) => (
+        {[...Array(5)].map((_, i) => (
           <NavItemSkeleton key={i} />
         ))}
       </ul>

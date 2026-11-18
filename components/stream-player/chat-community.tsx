@@ -12,12 +12,14 @@ import { CommunityItem } from "./community-item";
 
 interface ChatCommunityProps {
   hostName: string;
+  hostIdentity: string;
   viewerName: string;
   isHidden: boolean;
 };
 
 export const ChatCommunity = ({
   hostName,
+  hostIdentity,
   viewerName,
   isHidden
 }: ChatCommunityProps) => {
@@ -69,6 +71,7 @@ export const ChatCommunity = ({
           <CommunityItem
             key={participant.identity}
             hostName={hostName}
+            hostIdentity={hostIdentity}
             viewerName={viewerName}
             participantName={participant.name}
             participantIdentity={participant.identity}

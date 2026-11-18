@@ -2,6 +2,7 @@ import { getSelf } from "@/lib/auth-service";
 import { getStreamByUserId } from "@/lib/stream-service";
 
 import { ToggleCard } from "./_components/toggle-card";
+import { ModerationSettings } from "./_components/moderation-settings";
 
 const ChatPage = async () => {
   const self = await getSelf();
@@ -33,6 +34,11 @@ const ChatPage = async () => {
           field="isChatFollowersOnly"
           label="Must be following to chat"
           value={stream.isChatFollowersOnly}
+        />
+        <ModerationSettings
+          category={stream.category}
+          slowModeSeconds={stream.chatSlowModeSeconds}
+          bannedWords={stream.bannedWords}
         />
       </div>
     </div>

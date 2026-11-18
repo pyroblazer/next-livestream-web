@@ -19,6 +19,8 @@ type CustomStream = {
   isChatEnabled: boolean;
   isChatDelayed: boolean;
   isChatFollowersOnly: boolean;
+  chatSlowModeSeconds?: number;
+  bannedWords?: string | null;
   isLive: boolean;
   thumbnailUrl: string | null;
   name: string;
@@ -111,6 +113,8 @@ export const StreamPlayer = ({
             isChatEnabled={stream.isChatEnabled}
             isChatDelayed={stream.isChatDelayed}
             isChatFollowersOnly={stream.isChatFollowersOnly}
+            slowModeSeconds={stream.chatSlowModeSeconds ?? 0}
+            bannedWords={stream.bannedWords ?? null}
           />
         </div>
       </LiveKitRoom>

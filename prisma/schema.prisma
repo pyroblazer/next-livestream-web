@@ -24,6 +24,12 @@ model User {
 
   stream Stream?
 
+  moderating Moderator[] @relation("ModeratorUser")
+  moderators Moderator[] @relation("ModeratorStreamer")
+  timeouts ChatTimeout[] @relation("TimeoutUser")
+  reportsMade Report[] @relation("Reporter")
+  reportsReceived Report[] @relation("Reported")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -41,6 +47,11 @@ model Stream {
   isChatEnabled Boolean @default(true)
   isChatDelayed Boolean @default(false)
   isChatFollowersOnly Boolean @default(false)
+  chatSlowModeSeconds Int @default(0)
+  bannedWords String? @db.Text
+  category String?
+  viewerCount Int @default(0)
+  peakViewers Int @default(0)
 
   userId String @unique
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -50,6 +61,7 @@ model Stream {
 
   @@index([userId])
   @@index([ingressId])
+  @@index([category])
   @@fulltext([name])
 }
 
@@ -80,4 +92,48 @@ model Block {
   @@unique([blockerId, blockedId])
   @@index([blockerId])
   @@index([blockedId])
+}
+
+model Moderator {
+  id String @id @default(uuid())
+  streamerId String
+  userId String
+
+  streamer User @relation(name: "ModeratorStreamer", fields: [streamerId], references: [id], onDelete: Cascade)
+  user User @relation(name: "ModeratorUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([streamerId, userId])
+  @@index([streamerId])
+  @@index([userId])
+}
+
+model ChatTimeout {
+  id String @id @default(uuid())
+  streamerId String
+  userId String
+  expiresAt DateTime
+
+  user User @relation(name: "TimeoutUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([streamerId, userId])
+  @@index([userId])
+}
+
+model Report {
+  id String @id @default(uuid())
+  reporterId String
+  reportedId String
+  reason String
+  details String? @db.Text
+  resolved Boolean @default(false)
+
+  reporter User @relation(name: "Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reported User @relation(name: "Reported", fields: [reportedId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([reporterId])
+  @@index([reportedId])
 }

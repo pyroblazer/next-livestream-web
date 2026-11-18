@@ -7,6 +7,7 @@ import { getSelf } from "@/lib/auth-service";
 import { getUserById } from "@/lib/user-service";
 import { isBlockedByUser } from "@/lib/block-service";
 import { db } from "@/lib/db";
+import { isTimeoutActive } from "@/lib/moderation";
 
 export const createViewerToken = async (hostIdentity: string) => {
   let self;
@@ -41,6 +42,14 @@ export const createViewerToken = async (hostIdentity: string) => {
   if (isHost) {
     canChat = true;
   } else if (!isGuest) {
+    const timeout = await db.chatTimeout.findUnique({
+      where: { streamerId_userId: { streamerId: host.id, userId: self.id } },
+      select: { expiresAt: true },
+    });
+    if (isTimeoutActive(timeout?.expiresAt)) {
+      return signToken(self, host.id, isHost, false);
+    }
+
     const stream = await db.stream.findUnique({
       where: { userId: host.id },
       select: { isChatEnabled: true, isChatFollowersOnly: true },
@@ -60,6 +69,15 @@ export const createViewerToken = async (hostIdentity: string) => {
     }
   }
 
+  return signToken(self, host.id, isHost, canChat);
+};
+
+const signToken = async (
+  self: { id: string; username: string },
+  roomId: string,
+  isHost: boolean,
+  canChat: boolean
+) => {
   const token = new AccessToken(
     process.env.LIVEKIT_API_KEY!,
     process.env.LIVEKIT_API_SECRET!,
@@ -70,7 +88,7 @@ export const createViewerToken = async (hostIdentity: string) => {
   );
 
   token.addGrant({
-    room: host.id,
+    room: roomId,
     roomJoin: true,
     canPublish: false,
     canPublishData: canChat,

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { db } from "@/lib/db";
 import { getSelf } from "@/lib/auth-service";
+import { clampSlowMode, normalizeCategory, parseBannedWords } from "@/lib/moderation";
 
 export const updateStream = async (values: Partial<Stream>) => {
   try {
@@ -25,6 +26,9 @@ export const updateStream = async (values: Partial<Stream>) => {
       isChatEnabled: values.isChatEnabled,
       isChatFollowersOnly: values.isChatFollowersOnly,
       isChatDelayed: values.isChatDelayed,
+      ...(values.category !== undefined && { category: normalizeCategory(values.category) }),
+      ...(values.chatSlowModeSeconds !== undefined && { chatSlowModeSeconds: clampSlowMode(values.chatSlowModeSeconds) }),
+      ...(values.bannedWords !== undefined && { bannedWords: parseBannedWords(values.bannedWords).join(", ") || null }),
     };
 
     const stream = await db.stream.update({

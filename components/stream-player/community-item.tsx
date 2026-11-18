@@ -2,15 +2,17 @@
 
 import { toast } from "sonner";
 import { useTransition } from "react";
-import { MinusCircle } from "lucide-react";
+import { MinusCircle, Timer } from "lucide-react";
 
 import { Hint } from "@/components/hint";
 import { onBlock } from "@/actions/block";
+import { timeoutUser } from "@/actions/moderation";
 import { cn, stringToColor } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 interface CommunityItemProps {
   hostName: string;
+  hostIdentity: string;
   viewerName: string;
   participantName?: string;
   participantIdentity: string;
@@ -18,6 +20,7 @@ interface CommunityItemProps {
 
 export const CommunityItem = ({
   hostName,
+  hostIdentity,
   viewerName,
   participantIdentity,
   participantName,
@@ -38,6 +41,16 @@ export const CommunityItem = ({
     });
   }
 
+  const handleTimeout = () => {
+    if (!participantName || isSelf || !isHost) return;
+
+    startTransition(() => {
+      timeoutUser(hostIdentity, participantIdentity, 10)
+        .then(() => toast.success(`${participantName} timed out for 10 minutes`))
+        .catch(() => toast.error("Something went wrong"));
+    });
+  };
+
   return (
     <div className={cn(
       "group flex items-center justify-between w-full p-2 rounded-md text-sm hover:bg-white/5",
@@ -46,6 +59,18 @@ export const CommunityItem = ({
       <p style={{ color: color }}>
         {participantName}
       </p>
+      {isHost && !isSelf && (
+        <Hint label="Time out 10 min">
+          <Button
+            variant="ghost"
+            disabled={isPending}
+            onClick={handleTimeout}
+            aria-label={`Time out ${participantName}`}
+            className="h-auto w-auto p-1 opacity-0 group-hover:opacity-100 transition">
+            <Timer className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </Hint>
+      )}
       {isHost && !isSelf && (
         <Hint label="Block">
           <Button

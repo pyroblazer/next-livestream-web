@@ -3,8 +3,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { ResultCard, ResultCardSkeleton } from "./result-card";
 
-export const Results = async () => {
-  const data = await getStreams();
+export const Results = async ({ category }: { category?: string }) => {
+  const data = await getStreams(category);
 
   return (
     <div>

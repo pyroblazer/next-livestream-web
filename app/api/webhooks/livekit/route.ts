@@ -46,5 +46,29 @@ export async function POST(req: Request) {
     });
   }
 
+  // Viewer counts (room name is the streamer id; the streamer's own identity starts with "host-")
+  const roomName = event.room?.name;
+  const identity = event.participant?.identity ?? "";
+  if (roomName && !identity.startsWith("host-")) {
+    if (event.event === "participant_joined") {
+      const updated = await db.stream.update({
+        where: { userId: roomName },
+        data: { viewerCount: { increment: 1 } },
+      }).catch(() => null);
+      if (updated && updated.viewerCount > updated.peakViewers) {
+        await db.stream.update({ where: { userId: roomName }, data: { peakViewers: updated.viewerCount } });
+      }
+    }
+    if (event.event === "participant_left") {
+      await db.stream.updateMany({
+        where: { userId: roomName, viewerCount: { gt: 0 } },
+        data: { viewerCount: { decrement: 1 } },
+      });
+    }
+  }
+  if (event.event === "room_finished" && roomName) {
+    await db.stream.updateMany({ where: { userId: roomName }, data: { viewerCount: 0 } });
+  }
+
   return new Response("ok", { status: 200 });
 }

@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { onFollow, onUnfollow } from "@/actions/follow";
 
+import { ReportButton } from "./report-button";
+
 interface ActionsProps {
   hostIdentity: string;
   isFollowing: boolean;
@@ -57,6 +59,8 @@ export const Actions = ({
   }
 
   return (
+    <div className="flex items-center gap-2 w-full lg:w-auto">
+    {!isHost && <ReportButton hostIdentity={hostIdentity} />}
     <Button
       disabled={isPending || isHost}
       onClick={toggleFollow}
@@ -75,6 +79,7 @@ export const Actions = ({
         : "Follow"
       }
     </Button>
+    </div>
   )
 };
 
