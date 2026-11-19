@@ -5,7 +5,8 @@ import { STREAM_CATEGORIES, normalizeCategory } from "@/lib/moderation";
 
 import { Results, ResultsSkeleton } from "./_components/results";
 
-export default function Page({ searchParams }: { searchParams?: { category?: string } }) {
+export default async function Page(props: { searchParams?: Promise<{ category?: string }> }) {
+  const searchParams = await props.searchParams;
   const category = normalizeCategory(searchParams?.category) ?? undefined;
   return (
     <div className="h-full p-8 max-w-screen-2xl mx-auto">

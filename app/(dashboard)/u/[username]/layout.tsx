@@ -7,14 +7,15 @@ import { Sidebar } from "./_components/sidebar";
 import { Container } from "./_components/container";
 
 interface CreatorLayoutProps {
-  params: { username: string };
+  params: Promise<{ username: string }>;
   children: React.ReactNode;
 };
 
 const CreatorLayout = async ({
-  params,
+  params: paramsPromise,
   children,
 }: CreatorLayoutProps) => {
+  const params = await paramsPromise;
   const self = await getSelfByUsername(params.username);
 
   if (!self) {

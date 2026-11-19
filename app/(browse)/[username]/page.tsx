@@ -7,12 +7,13 @@ import { isBlockedByUser } from "@/lib/block-service";
 import { StreamPlayer } from "@/components/stream-player";
 
 interface UserPageProps {
-  params: {
+  params: Promise<{
     username: string;
-  };
+  }>;
 };
 
-export async function generateMetadata({ params }: UserPageProps): Promise<Metadata> {
+export async function generateMetadata(props: UserPageProps): Promise<Metadata> {
+  const params = await props.params;
   const user = await getUserByUsername(params.username);
   if (!user?.stream) return { title: "Channel not found" };
   const title = `${user.username} ${user.stream.isLive ? "is live" : "on Streamify"}`;
@@ -24,9 +25,8 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
   };
 }
 
-const UserPage = async ({
-  params
-}: UserPageProps) => {
+const UserPage = async (props: UserPageProps) => {
+  const params = await props.params;
   const user = await getUserByUsername(params.username);
 
   if (!user || !user.stream) {

@@ -1,18 +1,13 @@
 import Link from "next/link";
 import { Clapperboard } from "lucide-react";
-import { 
-  SignInButton, 
-  UserButton, 
-  currentUser
-} from "@clerk/nextjs";
+import { SignInButton, UserButton } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 
 import { Button } from "@/components/ui/button";
 
 export const Actions = async () => {
   const user = await currentUser();
 
-  console.warn("dddeadeadeadeadead");
-  console.warn(user);
   return (
     <div className="flex items-center justify-end gap-x-2 ml-4 lg:ml-0">
       {!user && (

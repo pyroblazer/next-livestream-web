@@ -4,14 +4,13 @@ import { redirect } from "next/navigation";
 import { Results, ResultsSkeleton } from "./_components/results";
 
 interface SearchPageProps {
-  searchParams: {
+  searchParams: Promise<{
     term?: string;
-  };
+  }>;
 };
 
-const SearchPage = ({
-  searchParams,
-}: SearchPageProps) => {
+const SearchPage = async (props: SearchPageProps) => {
+  const searchParams = await props.searchParams;
   if (!searchParams.term) {
     redirect("/");
   }

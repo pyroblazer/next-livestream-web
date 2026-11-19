@@ -1,17 +1,16 @@
-import { currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 
 import { getUserByUsername } from "@/lib/user-service";
 import { StreamPlayer } from "@/components/stream-player";
 
 interface CreatorPageProps {
-  params: {
+  params: Promise<{
     username: string;
-  };
+  }>;
 };
 
-const CreatorPage = async ({
-  params,
-}: CreatorPageProps) => {
+const CreatorPage = async (props: CreatorPageProps) => {
+  const params = await props.params;
   const externalUser = await currentUser();
   const user = await getUserByUsername(params.username);
 
